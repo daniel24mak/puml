@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PUML Mobile Viewer</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .hero, .card, .footer-note {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    .hero {
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    .hero p {
+      margin: 6px 0 0;
+      color: #64748b;
+      font-size: 0.92rem;
+    }
+    .phone-icon {
+      font-size: 1.4rem;
+      background: #eef2f7;
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+    }
+    .card {
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      gap: 10px;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .badge {
+      background: #eef2ff;
+      color: #4338ca;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+    textarea, input {
+      width: 100%;
+      border: 1px solid #dbe2ea;
+      border-radius: 18px;
+      padding: 14px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    textarea {
+      min-height: 240px;
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+    input:focus, textarea:focus {
+      border-color: #94a3b8;
+    }
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 10px 0 8px;
+    }
+    .hint {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: #64748b;
+      line-height: 1.45;
+    }
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    button {
+      border: none;
+      border-radius: 18px;
+      padding: 13px 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    .primary {
+      background: #111827;
+      color: white;
+    }
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .outline {
+      background: white;
+      color: #111827;
+      border: 1px solid #d1d5db;
+    }
+    .error {
+      margin-top: 12px;
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      padding: 12px;
+      border-radius: 16px;
+      font-size: 0.9rem;
+    }
+    .preview-box {
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid #e2e8f0;
+      background: white;
+    }
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      background: white;
+    }
+    .empty {
+      border: 2px dashed #dbe2ea;
+      border-radius: 18px;
+      padding: 40px 20px;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.92rem;
+    }
+    .render-time {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    .footer-note {
+      padding: 16px;
+      font-size: 0.8rem;
+      color: #64748b;
+      line-height: 1.55;
+    }
+    @media (max-width: 420px) {
+      .button-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="hero">
+      <div>
+        <h1>PUML Mobile Viewer</h1>
+        <p>Paste PlantUML code and preview it instantly</p>
+      </div>
+      <div class="phone-icon">📱</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">PlantUML Input</div>
+        <div class="badge">GitHub Pages Ready</div>
+      </div>
+
+      <textarea id="pumlInput" placeholder="Paste your @startuml ... @enduml code"></textarea>
+
+      <label for="serverUrl">Renderer endpoint</label>
+      <input id="serverUrl" value="https://www.plantuml.com/plantuml/svg/" />
+      <div class="hint">Default uses the public PlantUML server, so it needs internet access.</div>
+
+      <div class="button-grid">
+        <button class="primary" onclick="renderDiagram()">▶ Visualize</button>
+        <button class="secondary" onclick="loadSample()">⟳ Sample</button>
+        <button class="outline" onclick="copyUrl()">⧉ Copy URL</button>
+        <button class="outline" onclick="clearAll()">⌫ Clear</button>
+      </div>
+
+      <div id="errorBox" class="error" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Diagram Preview</div>
+        <div id="renderTime" class="render-time"></div>
+      </div>
+      <div id="previewArea" class="empty">Your diagram preview will appear here.</div>
+    </div>
+
+    <div class="footer-note">
+      This single-file HTML app works well on GitHub Pages. Upload it as <strong>index.html</strong> in your repository and enable Pages.
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+  <script>
+    const SAMPLE = `@startuml
+skinparam backgroundColor transparent
+actor User
+participant App
+participant Renderer
+
+User -> App: Paste PUML code
+App -> Renderer: Encode + request diagram
+Renderer --> App: Rendered SVG
+App --> User: Show diagram
+@enduml`;
+
+    let lastDiagramUrl = "";
+
+    function encode6bit(b) {
+      if (b < 10) return String.fromCharCode(48 + b);
+      b -= 10;
+      if (b < 26) return String.fromCharCode(65 + b);
+      b -= 26;
+      if (b < 26) return String.fromCharCode(97 + b);
+      b -= 26;
+      if (b === 0) return '-';
+      if (b === 1) return '_';
+      return '?';
+    }
+
+    function append3bytes(b1, b2, b3) {
+      const c1 = b1 >> 2;
+      const c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
+      const c3 = ((b2 & 0xF) << 2) | (b3 >> 6);
+      const c4 = b3 & 0x3F;
+      return '' + encode6bit(c1 & 0x3F) + encode6bit(c2 & 0x3F) + encode6bit(c3 & 0x3F) + encode6bit(c4 & 0x3F);
+    }
+
+    function plantumlEncode(text) {
+      const data = new TextEncoder().encode(text);
+      const compressed = window.pako.deflate(data, { level: 9 });
+      let result = '';
+      for (let i = 2; i < compressed.length - 4; i += 3) {
+        if (i + 2 === compressed.length) {
+          result += append3bytes(compressed[i], compressed[i + 1], 0);
+        } else if (i + 1 === compressed.length) {
+          result += append3bytes(compressed[i], 0, 0);
+        } else {
+          result += append3bytes(compressed[i], compressed[i + 1], compressed[i + 2]);
+        }
+      }
+      return result;
+    }
+
+    function showError(message) {
+      const box = document.getElementById('errorBox');
+      box.textContent = message;
+      box.style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('errorBox').style.display = 'none';
+    }
+
+    function renderDiagram() {
+      hideError();
+      const code = document.getElementById('pumlInput').value.trim();
+      const serverUrlInput = document.getElementById('serverUrl').value.trim();
+      const previewArea = document.getElementById('previewArea');
+
+      if (!code) {
+        showError('Paste some PlantUML code first.');
+        return;
+      }
+
+      if (!code.startsWith('@startuml') || !code.endsWith('@enduml')) {
+        showError('Your code should start with @startuml and end with @enduml.');
+        return;
+      }
+
+      try {
+        const encoded = plantumlEncode(code);
+        const normalizedServer = serverUrlInput.endsWith('/') ? serverUrlInput : serverUrlInput + '/';
+        lastDiagramUrl = normalizedServer + encoded;
+
+        previewArea.className = 'preview-box';
+        previewArea.innerHTML = `<iframe title="PlantUML Preview" src="${lastDiagramUrl}"></iframe>`;
+        document.getElementById('renderTime').textContent = new Date().toLocaleString();
+      } catch (error) {
+        showError('Could not encode the PlantUML text.');
+      }
+    }
+
+    function loadSample() {
+      document.getElementById('pumlInput').value = SAMPLE;
+      renderDiagram();
+    }
+
+    async function copyUrl() {
+      if (!lastDiagramUrl) {
+        showError('Render a diagram first, then copy the URL.');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(lastDiagramUrl);
+        alert('Diagram URL copied.');
+      } catch {
+        showError('Could not copy the URL on this browser.');
+      }
+    }
+
+    function clearAll() {
+      document.getElementById('pumlInput').value = '';
+      document.getElementById('renderTime').textContent = '';
+      document.getElementById('previewArea').className = 'empty';
+      document.getElementById('previewArea').textContent = 'Your diagram preview will appear here.';
+      lastDiagramUrl = '';
+      hideError();
+    }
+
+    window.addEventListener('load', () => {
+      loadSample();
+    });
+  </script>
+</body>
+</html>
