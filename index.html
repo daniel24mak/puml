@@ -201,6 +201,7 @@
       <div class="button-grid">
         <button class="primary" onclick="renderDiagram()">▶ Visualize</button>
         <button class="secondary" onclick="loadSample()">⟳ Sample</button>
+        <button class="secondary" onclick="pasteFromClipboard()">📋 Paste</button>
         <button class="outline" onclick="copyUrl()">⧉ Copy URL</button>
         <button class="outline" onclick="clearAll()">⌫ Clear</button>
       </div>
@@ -337,6 +338,20 @@ App --> User: Show diagram
       document.getElementById('previewArea').textContent = 'Your diagram preview will appear here.';
       lastDiagramUrl = '';
       hideError();
+    }
+
+    async function pasteFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (!text) {
+          showError('Clipboard is empty.');
+          return;
+        }
+        document.getElementById('pumlInput').value = text;
+        hideError();
+      } catch (e) {
+        showError('Clipboard access denied. Use HTTPS or allow permissions.');
+      }
     }
 
     window.addEventListener('load', () => {
